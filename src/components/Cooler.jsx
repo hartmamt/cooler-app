@@ -6,8 +6,6 @@ import OuterWalls from './OuterWalls';
 import Wall from './Wall';
 
 export const Cooler = ({ state, effects }) => {
-  // can't have more than X vertical walls
-  console.log('state', state);
   const config = {
     cooler: {
       offset: {
@@ -29,10 +27,9 @@ export const Cooler = ({ state, effects }) => {
     },
   };
 
-  var count = 0; //document.getElementById('vwallcount').value;
+  var count = 0;
   var pos = config.cooler.length.feet * 550 / config.cooler.length.feet / (count * 1 + 2);
   var len = config.cooler.width.feet * 550 / config.cooler.length.feet;
-  //document.getElementById("vwallcount").value = 1;
 
   const walls = state.config['three'].walls.map((wall, counter) =>
     <Wall
