@@ -1,6 +1,109 @@
-import React, { Component } from 'react';
-import { Line, Arc, Group, Rect } from 'react-konva';
+import React from 'react';
+import { Rect } from 'react-konva';
 
+export class Door extends React.Component {
+  componentDidMount() {
+    function boundX(pos) {
+      var newY = pos.y;
+      if (pos.y < this.attrs.wallCoords.y0) {
+        newY = this.attrs.wallCoords.y0;
+      } else if (pos.y >= this.attrs.wallCoords.y1 - this.attrs.width) {
+        newY = this.attrs.wallCoords.y1 - this.attrs.width;
+      }
+      return {
+        x: this.getAbsolutePosition().x,
+        y: newY,
+      };
+    }
+    function boundY(pos) {
+      var newX = pos.x;
+      if (pos.x < this.attrs.wallCoords.x0) {
+        newX = this.attrs.wallCoords.x0;
+      } else if (pos.x >= this.attrs.wallCoords.x1 - this.attrs.width) {
+        newX = this.attrs.wallCoords.x1 - this.attrs.width;
+      }
+      return {
+        x: newX,
+        y: this.getAbsolutePosition().y,
+      };
+    }
+    //const coords = this.props.wallCoords;
+    this.refs.rect.setDragBoundFunc(this.props.wallOrientation === 'Vertical' ? boundX : boundY);
+  }
+
+  handleClick = e => {
+    this.setState({
+      color: window.Konva.Util.getRandomColor(),
+    });
+    this.props.handleRectFlip(this.props.index, this.props.wallIndex);
+  };
+
+  handleDragEnd = (e, index, x, y) => {
+    if (
+      this.props.handleCheckBounds(
+        e.target.attrs.y,
+        e.target.attrs.x,
+        this.props.width,
+        index,
+        this.props.wallIndex,
+        this.props.wallOrientation
+      )
+    ) {
+      this.props.handleRectMove(
+        {
+          x: e.target.attrs.x,
+          y: e.target.attrs.y,
+        },
+        index,
+        this.props.wallIndex
+      );
+    } else {
+      this.props.handleRectMove(
+        {
+          x: x,
+          y: y,
+        },
+        index,
+        this.props.wallIndex,
+        this.props.width
+      );
+    }
+
+    e.cancelBubble = true;
+  };
+
+  render() {
+    let x = this.props.coords.x;
+    let y = this.props.coords.y;
+
+    if (this.props.wallOrientation === 'Vertical') {
+      x =
+        this.props.direction === 'left'
+          ? this.props.coords.x - this.props.width - 4
+          : this.props.coords.x + 4;
+    } else {
+      y =
+        this.props.direction === 'left'
+          ? this.props.coords.y - this.props.width - 4
+          : this.props.coords.y + 4;
+    }
+    return (
+      <Rect
+        x={x}
+        y={y}
+        width={this.props.width}
+        height={this.props.width}
+        fill={'black'}
+        onDragMove={e => this.handleDragEnd(e, this.props.index, x, y)}
+        draggable
+        ref="rect"
+        wallCoords={this.props.wallCoords}
+        onClick={e => this.handleClick(e)}
+      />
+    );
+  }
+}
+/*
 export class Door extends Component {
   componentDidMount() {
     function boundY(pos) {
@@ -167,7 +270,7 @@ export class Door extends Component {
       }
     }
     return (
-      <Group ref="group" draggable={true}>
+      <Group ref="group" draggable={true} onDragStart={() => console.log('clicked')}>
         <Rect x={door.x0} y={door.y0 - 50} width={50} height={50} />
         <Arc
           x={door.x0}
@@ -188,5 +291,5 @@ export class Door extends Component {
     );
   }
 }
-
+*/
 export default Door;

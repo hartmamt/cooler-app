@@ -1,92 +1,92 @@
 import React from 'react';
-import { Line, Layer } from 'react-konva';
-import MeasureLine from './MeasureLine';
-import Door from './Door';
-import OuterWalls from './OuterWalls';
-import Wall from './Wall';
+import { injectState } from 'freactal';
+import { Layer, Stage } from 'react-konva';
 
-export const Cooler = ({ state, effects }) => {
-  const config = {
-    cooler: {
-      offset: {
-        x: state.offsetX,
-        y: state.offsetY,
-      },
-      length: {
-        feet: state.lengthFeet,
-        inches: state.lengthInches,
-        pixels: state.lengthInPixels,
-      },
-      width: {
-        feet: state.widthFeet,
-        inches: state.widthInches,
-        pixels: state.widthInPixels,
-      },
-      textHorizontal: state.textHorizontal,
-      textVertical: state.textVertical,
-    },
-  };
+import Walls from './Walls';
+import MeasureLines from './MeasureLines';
 
-  var count = 0;
-  var pos = config.cooler.length.feet * 550 / config.cooler.length.feet / (count * 1 + 2);
-  var len = config.cooler.width.feet * 550 / config.cooler.length.feet;
-
-  const walls = state.config['three'].walls.map((wall, counter) =>
-    <Wall
-      key={'wall-' + counter}
-      x={wall.x0 + pos}
-      y={wall.y0}
-      x1={pos + wall.x1}
-      y1={wall.y1 + len}
-      orientation={wall.orientation}
-    />
-  );
-
-  const doors = state.config['three'].doors.map((door, counter) => {
-    let _door = null;
-    console.log('ll', config.cooler.width.pixels / door.wpDivisor + door.y0);
-    if (door.orientation === 'Horizontal') {
-      _door = (
-        <Door
-          key={'hdoor-' + door.counter}
-          doorConfig={{
-            x0: config.cooler.length.pixels / door.lpDivisor + door.x0,
-            y0: door.y0,
-            doorWidth: door.w,
-            coolerWidth: config.cooler.length.feet,
-            doorOrientation: door.orientation,
-            doorSwing: door.sw,
-            doorOpening: door.op,
-          }}
-        />
-      );
-    } else if (door.orientation === 'Vertical') {
-      _door = (
-        <Door
-          key={'vdoor-' + door.counter}
-          doorConfig={{
-            x0: pos + door.x0,
-            y0: config.cooler.width.pixels / door.wpDivisor + door.y0,
-            doorWidth: door.w,
-            coolerWidth: config.cooler.length.feet,
-            doorOrientation: door.orientation,
-            doorSwing: door.sw,
-            doorOpening: door.op,
-          }}
-        />
-      );
-    }
-    return _door;
-  });
-
-  console.log('===>', doors);
+const Cooler = ({ effects }) => {
   return (
-    <Layer>
-      <OuterWalls config={config} />
-      {walls}
-      {doors}
-    </Layer>
+    <div>
+      <button onClick={() => effects.addDoor(36)}>Add Door 36</button>
+      <button onClick={() => effects.addDoor(48)}>Add Door 48</button>
+      <button onClick={() => effects.addDoor(54)}>Add Door 56</button>
+      <Stage width={1000} height={1000}>
+        <Layer>
+          <Walls />
+          <MeasureLines />
+        </Layer>
+      </Stage>
+    </div>
   );
 };
 
-export default Cooler;
+export default injectState(Cooler);
+
+/*
+// handleRectMove = (coords, index, wallIndex) => {
+//   const walls = this.props.state.walls;
+//   const door = walls[wallIndex].doors[index];
+//   if (walls[wallIndex].orientation === 'Horizontal') {
+//     walls[wallIndex].doors[index].y =
+//       door.direction === 'left' ? coords.y + door.width + 4 : coords.y - 4;
+//     walls[wallIndex].doors[index].x = door.direction === 'left' ? coords.x + 0 : coords.x;
+//   } else {
+//     walls[wallIndex].doors[index].y = door.direction === 'left' ? coords.y : coords.y;
+//     walls[wallIndex].doors[index].x =
+//       door.direction === 'left' ? coords.x + door.width + 4 : coords.x - 4;
+//   }
+//   this.setState({
+//     walls,
+//   });
+// };
+
+// handleWallMove = (coords, index) => {
+//   const walls = this.props.state.config.four.walls;
+//   walls[index].x0 = walls[index].origX + coords.x;
+//   walls[index].x1 = walls[index].origX + coords.x;
+//   this.setState({
+//     walls,
+//   });
+// };
+
+// handleRectFlip = (index, wallIndex) => {
+//   const walls = this.props.state.config.four.walls;
+//   walls[wallIndex].doors[index].direction =
+//     walls[wallIndex].doors[index].direction === 'left' ? 'right' : 'left';
+//   this.setState({
+//     walls,
+//   });
+// };
+
+// handleSelectWall = (e, wallIndex) => {
+//   console.log('wallIndex', wallIndex);
+//   this.props.effects.selectWall(e.evt.clientX, e.evt.clientY, wallIndex);
+// };
+//
+// handleAddDoor = width => {
+//   this.props.effects.addDoor(width);
+// };
+
+handleCheckBounds = (n, o, width, index, wallIndex, wallOrientation) => {
+  let isDraggable = true;
+  const doorWidth = this.props.state.config.four.walls[wallIndex].doors[index].width;
+
+  const c =
+    wallOrientation === 'Vertical'
+      ? this.props.state.walls[wallIndex].doors
+          .filter((r, key) => key !== index)
+          .map(r => ({ n: r.y, width: r.width }))
+      : this.props.state.walls[wallIndex].doors
+          .filter((r, key) => key !== index)
+          .map(r => ({ n: r.x, width: r.width }));
+  const v = wallOrientation === 'Vertical' ? n : o;
+  for (let i = 0; i < c.length; i++) {
+    isDraggable = v + doorWidth < c[i].n || v > c[i].n + c[i].width;
+    if (isDraggable === false) {
+      break;
+    }
+  }
+  return isDraggable;
+};
+*/
