@@ -45,8 +45,7 @@ class Wall extends React.Component {
           stroke={wall.selected ? 'red' : 'black'}
           strokeWidth={8}
           index={wall.index}
-          onClick={event =>
-            wall.handleSelectWall(event.target.attrs.x, event.target.attrs.y, wall.index)}
+          onClick={event => wall.handleSelectWall(event.evt.clientX, event.evt.clientY, wall.index)}
           ref="wall"
           draggable
           onDragStart={e => (e.cancelBubble = true)}

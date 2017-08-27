@@ -32,10 +32,7 @@ export class Door extends React.Component {
   }
 
   handleClick = e => {
-    this.setState({
-      color: window.Konva.Util.getRandomColor(),
-    });
-    this.props.handleRectFlip(this.props.index, this.props.wallIndex);
+    this.props.handleDoorFlip(this.props.index, this.props.wallIndex);
   };
 
   handleDragEnd = (e, index, x, y) => {
@@ -49,7 +46,7 @@ export class Door extends React.Component {
         this.props.wallOrientation
       )
     ) {
-      this.props.handleRectMove(
+      this.props.handleDoorMove(
         {
           x: e.target.attrs.x,
           y: e.target.attrs.y,
@@ -58,7 +55,7 @@ export class Door extends React.Component {
         this.props.wallIndex
       );
     } else {
-      this.props.handleRectMove(
+      this.props.handleDoorMove(
         {
           x: x,
           y: y,

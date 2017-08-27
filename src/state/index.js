@@ -1,4 +1,4 @@
-import { provideState, update } from 'freactal';
+import { provideState, update, mergeIntoState } from 'freactal';
 
 export default provideState({
   initialState: () => ({
@@ -10,6 +10,7 @@ export default provideState({
     lengthInches: 0,
     vWallCount: 0,
     hWallCount: 0,
+    counter: 0,
     config: {
       four: {
         walls: [
@@ -250,7 +251,7 @@ export default provideState({
       walls[wallIndex].selected = !walls[wallIndex].selected;
       walls[wallIndex].selectedY = y - 20;
       walls[wallIndex].selectedX = x;
-      Object.assign({}, state, { walls });
+      return Object.assign({}, state, { walls });
     },
     addDoor: (effects, width) => state => {
       var wdth = 0;
@@ -261,8 +262,7 @@ export default provideState({
       //wdth = `document.getElementById("length")`;
       //htth = document.getElementById("width"); d
 
-      const walls = state.config['four'].walls;
-      walls.map(wall => {
+      const walls = state.walls.map(wall => {
         if (wall.selected) {
           wall.doors.push({
             x: wall.selectedX,
@@ -275,16 +275,10 @@ export default provideState({
         }
         return wall;
       });
-      update(state => {
-        config: {
-          four: {
-            walls;
-          }
-        }
-      });
+      return Object.assign({}, state, { walls });
     },
     moveDoor: (effects, coords, index, wallIndex) => state => {
-      const walls = state.config['four'].walls;
+      const walls = state.walls;
       const door = walls[wallIndex].doors[index];
       if (walls[wallIndex].orientation === 'Horizontal') {
         walls[wallIndex].doors[index].y =
@@ -295,59 +289,20 @@ export default provideState({
         walls[wallIndex].doors[index].x =
           door.direction === 'left' ? coords.x + door.width + 4 : coords.x - 4;
       }
-      update(state => {
-        config: {
-          four: {
-            walls;
-          }
-        }
-      });
+      return Object.assign({}, state, { walls });
     },
     moveWall: (effects, coords, index) => state => {
-      const walls = state.config['four'].walls;
+      const walls = state.walls;
       walls[index].x0 = walls[index].origX + coords.x;
       walls[index].x1 = walls[index].origX + coords.x;
-      update(state => {
-        config: {
-          four: {
-            walls;
-          }
-        }
-      });
+      return Object.assign({}, state, { walls });
     },
     flipDoor: (effects, index, wallIndex) => state => {
-      const walls = state.config['four'].walls;
+      const walls = state.walls;
       walls[wallIndex].doors[index].direction =
         walls[wallIndex].doors[index].direction === 'left' ? 'right' : 'left';
-      update(state => {
-        config: {
-          four: {
-            walls;
-          }
-        }
-      });
-    },
-    checkBounds: (effects, n, o, width, index, wallIndex, wallOrientation) => state => {
-      const walls = state.config['four'].walls;
-      let isDraggable = true;
-      const doorWidth = walls[wallIndex].doors[index].width;
 
-      const c =
-        wallOrientation === 'Vertical'
-          ? walls[wallIndex].doors
-              .filter((r, key) => key !== index)
-              .map(r => ({ n: r.y, width: r.width }))
-          : walls[wallIndex].doors
-              .filter((r, key) => key !== index)
-              .map(r => ({ n: r.x, width: r.width }));
-      const v = wallOrientation === 'Vertical' ? n : o;
-      for (let i = 0; i < c.length; i++) {
-        isDraggable = v + doorWidth < c[i].n || v > c[i].n + c[i].width;
-        if (isDraggable === false) {
-          break;
-        }
-      }
-      return isDraggable;
+      return Object.assign({}, state, { walls });
     },
     /*
 

@@ -5,7 +5,7 @@ import { Layer, Stage } from 'react-konva';
 import Walls from './Walls';
 import MeasureLines from './MeasureLines';
 
-const Cooler = ({ effects }) => {
+const Cooler = ({ state, effects }) => {
   return (
     <div>
       <button onClick={() => effects.addDoor(36)}>Add Door 36</button>
