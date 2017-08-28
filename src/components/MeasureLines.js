@@ -1,18 +1,22 @@
 import React from 'react';
-import { injectState } from 'freactal';
 import { Group } from 'react-konva';
 import MeasureLine from './MeasureLine';
 
-const MeasureLines = injectState(({ state, effects }) => {
-  var rightWallIndex = state.walls
-    .filter(wall => wall.orientation === 'Vertical' && wall.external === true)
-    .reduce((prev, curr) => (prev.x1 > curr.x1 ? prev : curr));
+const MeasureLines = cooler => {
+  const walls = cooler.walls.length > 0 ? cooler.walls : [];
+  const rightWallIndex =
+    walls.length > 0 &&
+    walls
+      .filter(wall => wall.orientation === 'Vertical' && wall.external === true)
+      .reduce((prev, curr) => (prev.x1 > curr.x1 ? prev : curr));
 
-  var bottomWallIndex = state.walls
-    .filter(wall => wall.orientation === 'Horizontal' && wall.external === true)
-    .reduce((prev, curr, index) => {
-      return prev.y1 > curr.y1 ? prev : curr;
-    });
+  const bottomWallIndex =
+    walls.length > 0 &&
+    walls
+      .filter(wall => wall.orientation === 'Horizontal' && wall.external === true)
+      .reduce((prev, curr, index) => {
+        return prev.y1 > curr.y1 ? prev : curr;
+      });
 
   let measureLine = (
     <Group>
@@ -41,18 +45,18 @@ const MeasureLines = injectState(({ state, effects }) => {
   const xArray = [];
   const yArray = [];
 
-  const horizontalIntersectWalls = state.walls.filter(w => {
+  const horizontalIntersectWalls = walls.filter(w => {
     //Horizontal only
     return w.orientation === 'Vertical' && w.external === false;
   });
 
-  const verticalIntersectWalls = state.walls.filter(w => {
+  const verticalIntersectWalls = walls.filter(w => {
     //Horizontal only
     return w.orientation === 'Horizontal' && w.external === false;
   });
 
-  const xDoorArray = bottomWallIndex.doors;
-  const yDoorArray = rightWallIndex.doors;
+  const xDoorArray = bottomWallIndex.doors ? bottomWallIndex.doors : 0;
+  const yDoorArray = rightWallIndex.doors ? rightWallIndex.doors : 0;
 
   if (xDoorArray.length > 0) {
     xDoorArray.map(door => {
@@ -153,5 +157,5 @@ const MeasureLines = injectState(({ state, effects }) => {
       {iLines}
     </Group>
   );
-});
+};
 export default MeasureLines;

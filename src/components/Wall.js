@@ -17,13 +17,15 @@ class Wall extends React.Component {
         y: this.getAbsolutePosition().y,
       };
     }
-    this.refs.wall.setDragBoundFunc(this.props.wallOrientation === 'Vertical' ? boundX : boundY);
+    //  this.refs.wall.setDragBoundFunc(this.props.wallOrientation === 'Vertical' ? boundX : boundY);
   }
 
-  handleDragEnd = (e, index, x, y) => {
+  handleDragEnd = (e, index) => {
+    console.log(e.target._lastPos);
     let xPos = e.target.attrs.x;
     let yPos = e.target.attrs.y;
-    e.cancelBubble = true;
+    //console.log({ xPos, yPos });
+    //e.cancelBubble = true;
     this.props.handleWallMove(
       {
         x: xPos,
@@ -49,7 +51,7 @@ class Wall extends React.Component {
           ref="wall"
           draggable
           onDragStart={e => (e.cancelBubble = true)}
-          onDragMove={e => this.handleDragEnd(e, wall.index, 0, 0)}
+          onDragMove={e => this.handleDragEnd(e, wall.index)}
         />
         {wall.selected
           ? <Circle

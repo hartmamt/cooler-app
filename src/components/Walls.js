@@ -1,13 +1,14 @@
 import React from 'react';
-import { injectState } from 'freactal';
 import { Group } from 'react-konva';
+import { connect } from 'react-redux';
+import { selectWall } from '../state/actions';
 import MeasureLine from './MeasureLine';
 import Wall from './Wall';
 import Door from './Door';
 
-const Walls = injectState(({ state, effects }) => {
+const Walls = ({ walls, handleSelectWall, handleDoorMove, handleWallMove }) => {
   const handleCheckBounds = (n, o, width, index, wallIndex, wallOrientation) => {
-    const walls = state.walls;
+    const _walls = walls;
     let isDraggable = true;
     const doorWidth = walls[wallIndex].doors[index].width;
     const c =
@@ -28,12 +29,12 @@ const Walls = injectState(({ state, effects }) => {
     return isDraggable;
   };
 
-  const walls = state.walls.map((wall, counter) => {
+  const _walls = walls.map((wall, counter) => {
     const doors = wall.doors.map((door, doorCounter) =>
       <Group key={'group-doors-' + doorCounter}>
         <Door
-          handleDoorMove={effects.moveDoor}
-          handleDoorFlip={effects.flipDoor}
+          handleDoorMove={handleDoorMove}
+          handleDoorFlip={handleSelectWall}
           coords={{
             x: wall.orientation === 'Vertical' ? wall.x0 : door.x,
             y: wall.orientation === 'Horizontal' ? wall.y0 : door.y,
@@ -70,8 +71,8 @@ const Walls = injectState(({ state, effects }) => {
           selected={wall.selected}
           selectedX={wall.selectedX}
           selectedY={wall.selectedY}
-          handleSelectWall={effects.selectWall}
-          handleWallMove={effects.moveWall}
+          handleSelectWall={handleSelectWall}
+          handleWallMove={handleWallMove}
           wallOrientation={wall.wallOrientation}
           origX={wall.origX}
           origY={wall.origY}
@@ -82,8 +83,9 @@ const Walls = injectState(({ state, effects }) => {
   });
   return (
     <Group>
-      {walls}
+      {_walls}
     </Group>
   );
-});
+};
+
 export default Walls;
