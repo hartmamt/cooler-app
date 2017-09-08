@@ -6,7 +6,17 @@ import MeasureLine from './MeasureLine';
 import Wall from './Wall';
 import Door from './Door';
 
-const Walls = ({ walls, handleSelectWall, handleDoorMove, handleWallMove }) => {
+const Walls = ({
+  walls,
+  handleSelectWall,
+  handleDoorMove,
+  handleWallMove,
+  handleDoorFlip,
+  handleDoorReverse,
+  handleEndWallMove,
+  handleEndDoorMove,
+  handleSelectDoor,
+}) => {
   const handleCheckBounds = (n, o, width, index, wallIndex, wallOrientation) => {
     const _walls = walls;
     let isDraggable = true;
@@ -34,18 +44,25 @@ const Walls = ({ walls, handleSelectWall, handleDoorMove, handleWallMove }) => {
       <Group key={'group-doors-' + doorCounter}>
         <Door
           handleDoorMove={handleDoorMove}
-          handleDoorFlip={handleSelectWall}
+          handleEndDoorMove={handleEndDoorMove}
+          handleDoorFlip={handleDoorFlip}
+          handleDoorReverse={handleDoorReverse}
+          handleSelectDoor={handleSelectDoor}
           coords={{
             x: wall.orientation === 'Vertical' ? wall.x0 : door.x,
             y: wall.orientation === 'Horizontal' ? wall.y0 : door.y,
           }}
           index={doorCounter}
           direction={door.direction}
+          doorSwing={door.doorSwing}
+          doorOpening={door.doorOpening}
           width={door.width}
           handleCheckBounds={handleCheckBounds}
+          coolerWidth={16}
           wallIndex={counter}
           wallCoords={{ x0: wall.x0, y0: wall.y0, x1: wall.x1, y1: wall.y1 }}
           wallOrientation={wall.orientation}
+          selected={door.selected}
         />
         {!wall.external
           ? <MeasureLine
@@ -73,6 +90,7 @@ const Walls = ({ walls, handleSelectWall, handleDoorMove, handleWallMove }) => {
           selectedY={wall.selectedY}
           handleSelectWall={handleSelectWall}
           handleWallMove={handleWallMove}
+          handleEndWallMove={handleEndWallMove}
           wallOrientation={wall.wallOrientation}
           origX={wall.origX}
           origY={wall.origY}

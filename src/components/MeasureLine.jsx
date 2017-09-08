@@ -80,8 +80,12 @@ class MeasureLine extends React.Component {
           fontWeight="bold"
           text={
             wall.orientation === 'Horizontal'
-              ? `${hFeet} ft${hInches > 0 ? ' ' + this.getInches(hInches.toFixed(2)) + ' in' : ''}`
-              : `${vFeet} ft${vInches > 0 ? ' ' + this.getInches(vInches.toFixed(2)) + ' in' : ''}`
+              ? `${Math.abs(hFeet)} ft${hInches > 0 && this.getInches(hInches.toFixed(2)) !== 0
+                  ? ' ' + this.getInches(Math.abs(hInches.toFixed(2))) + ' in'
+                  : ''}`
+              : `${Math.abs(vFeet)} ft${vInches > 0 && this.getInches(hInches.toFixed(2)) !== 0
+                  ? ' ' + this.getInches(Math.abs(vInches.toFixed(2))) + ' in'
+                  : ''}`
           }
           fill={'black'}
           fontFamily={'Arial'}

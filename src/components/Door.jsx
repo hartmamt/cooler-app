@@ -1,5 +1,5 @@
 import React from 'react';
-import { Rect } from 'react-konva';
+import { Rect, Group, Arc, Line } from 'react-konva';
 
 export class Door extends React.Component {
   componentDidMount() {
@@ -27,7 +27,6 @@ export class Door extends React.Component {
         y: this.getAbsolutePosition().y,
       };
     }
-    //const coords = this.props.wallCoords;
     this.refs.rect.setDragBoundFunc(this.props.wallOrientation === 'Vertical' ? boundX : boundY);
   }
 
@@ -35,7 +34,11 @@ export class Door extends React.Component {
     this.props.handleDoorFlip(this.props.index, this.props.wallIndex);
   };
 
-  handleDragEnd = (e, index, x, y) => {
+  handleDoubleClick = e => {
+    this.props.handleDoorReverse(this.props.index, this.props.wallIndex);
+  };
+
+  handleDragMove = (e, index, x, y) => {
     if (
       this.props.handleCheckBounds(
         e.target.attrs.y,
@@ -69,6 +72,19 @@ export class Door extends React.Component {
     e.cancelBubble = true;
   };
 
+  handleDragEnd = (e, index, x, y) => {
+    this.props.handleEndDoorMove(
+      {
+        x: e.target.attrs.x,
+        y: e.target.attrs.y,
+      },
+      index,
+      this.props.wallIndex
+    );
+
+    e.cancelBubble = true;
+  };
+
   render() {
     let x = this.props.coords.x;
     let y = this.props.coords.y;
@@ -84,50 +100,18 @@ export class Door extends React.Component {
           ? this.props.coords.y - this.props.width - 4
           : this.props.coords.y + 4;
     }
-    return (
-      <Rect
-        x={x}
-        y={y}
-        width={this.props.width}
-        height={this.props.width}
-        fill={'black'}
-        onDragMove={e => this.handleDragEnd(e, this.props.index, x, y)}
-        draggable
-        ref="rect"
-        wallCoords={this.props.wallCoords}
-        onClick={e => this.handleClick(e)}
-      />
-    );
-  }
-}
-/*
-export class Door extends Component {
-  componentDidMount() {
-    function boundY(pos) {
-      return {
-        x: pos.x,
-        y: this.getAbsolutePosition().y,
-      };
-    }
-    function boundX(pos) {
-      return {
-        x: this.getAbsolutePosition().x,
-        y: pos.y,
-      };
-    }
 
-    if (this.props.doorConfig.orientation === 'Horizontal') {
-      this.refs.group.setDragBoundFunc(boundY);
-    } else {
-      this.refs.group.setDragBoundFunc(boundX);
-    }
-  }
-  render() {
-    const config = this.props.doorConfig;
-    const doorSwing = (config.doorWidth * 2 + 3) * ((22 - 3) / (config.coolerWidth - 3));
+    const props = this.props;
+    const doorSwing = (props.width - 22 / 25 * 12 * 2 + 3) * (22 / 16);
     const doorWidth = doorSwing + 5;
 
     let door = {
+      x0: 0,
+      y0: 0,
+      angle: 0,
+    };
+
+    let rect = {
       x0: 0,
       y0: 0,
       angle: 0,
@@ -146,147 +130,176 @@ export class Door extends Component {
       x1: 0,
       y1: 0,
     };
-
-    if (config.doorOrientation === 'Vertical') {
-      if (config.doorSwing === 'Right') {
-        if (config.doorOpening === 'Out') {
-          door.x0 = config.x0;
-          door.y0 = config.y0;
+    if (this.props.wallOrientation === 'Vertical') {
+      if (props.doorSwing === 'right') {
+        if (props.doorOpening === 'out') {
+          rect.x0 = props.coords.x;
+          rect.y0 = props.coords.y - props.width;
+          door.x0 = props.coords.x;
+          door.y0 = props.coords.y;
           door.angle = 360 - 270;
           door.rotation = 270;
-          line.x0 = config.x0;
-          line.y0 = config.y0;
-          line.x1 = config.x0 + doorWidth;
-          line.y1 = config.y0;
-          line2.x0 = config.x0;
-          line2.y0 = config.y0;
-          line2.x1 = config.x0 + doorWidth;
-          line2.y1 = config.y0;
+          line.x0 = props.coords.x;
+          line.y0 = props.coords.y;
+          line.x1 = props.coords.x + props.width;
+          line.y1 = props.coords.y;
+          line2.x0 = props.coords.x;
+          line2.y0 = props.coords.y;
+          line2.x1 = props.coords.x;
+          line2.y1 = props.coords.y - props.width;
         } else {
-          door.x0 = config.x0;
-          door.y0 = config.y0;
-          door.angle = 360 - 90;
-          door.rotation = 90;
-          line.x0 = config.x0;
-          line.y0 = config.y0;
-          line.x1 = config.x0;
-          line.y1 = config.y0 + doorWidth;
-          line2.x0 = config.x0;
-          line2.y0 = config.y0;
-          line2.x1 = config.x0 + doorWidth;
-          line2.y1 = config.y0;
+          rect.x0 = props.coords.x - props.width;
+          rect.y0 = props.coords.y - props.width;
+          door.x0 = props.coords.x;
+          door.y0 = props.coords.y;
+          door.angle = 360 - 270;
+          door.rotation = 180;
+          line.x0 = props.coords.x;
+          line.y0 = props.coords.y;
+          line.x1 = props.coords.x - props.width;
+          line.y1 = props.coords.y;
+          line2.x0 = props.coords.x;
+          line2.y0 = props.coords.y;
+          line2.x1 = props.coords.x;
+          line2.y1 = props.coords.y - props.width;
         }
       } else {
-        if (config.doorOpening === 'Out') {
-          door.x0 = config.x0 + doorWidth;
-          door.y0 = config.y0;
-          door.angle = 360 - 180;
-          door.rotation = 270;
-          line.x0 = config.x0 + doorWidth;
-          line.y0 = config.y0;
-          line.x1 = config.x0 + doorWidth;
-          line.y1 = config.y0 - doorWidth;
-          line2.x0 = config.x0;
-          line2.y0 = config.y0;
-          line2.x1 = config.x0 + doorWidth;
-          line2.y1 = config.y0;
+        if (props.doorOpening === 'out') {
+          door.x0 = props.coords.x;
+          door.y0 = props.coords.y - props.width;
+          rect.x0 = props.coords.x;
+          rect.y0 = props.coords.y - props.width;
+          door.angle = 360 - 270;
+          door.rotation = 0;
+          line.x0 = props.coords.x + props.width;
+          line.y0 = props.coords.y - props.width;
+          line.x1 = props.coords.x;
+          line.y1 = props.coords.y - props.width;
+          line2.x0 = props.coords.x;
+          line2.y0 = props.coords.y;
+          line2.x1 = props.coords.x;
+          line2.y1 = props.coords.y - props.width;
         } else {
-          door.x0 = config.x0 + doorWidth;
-          door.y0 = config.y0;
-          door.angle = 360 - 90;
-          door.rotation = 180;
-          line.x0 = config.x0 + doorWidth;
-          line.y0 = config.y0;
-          line.x1 = config.x0 + doorWidth;
-          line.y1 = config.y0 + doorWidth;
-          line2.x0 = config.x0;
-          line2.y0 = config.y0;
-          line2.x1 = config.x0 + doorWidth;
-          line2.y1 = config.y0;
+          door.x0 = props.coords.x;
+          door.y0 = props.coords.y - props.width;
+          rect.x0 = props.coords.x - props.width;
+          rect.y0 = props.coords.y - props.width;
+          door.angle = 360 - 270;
+          door.rotation = 90;
+          line.x0 = props.coords.x - props.width;
+          line.y0 = props.coords.y - props.width;
+          line.x1 = props.coords.x;
+          line.y1 = props.coords.y - props.width;
+          line2.x0 = props.coords.x;
+          line2.y0 = props.coords.y;
+          line2.x1 = props.coords.x;
+          line2.y1 = props.coords.y - props.width;
         }
       }
     }
 
-    if (config.doorOrientation === 'Horizontal') {
-      if (config.doorSwing === 'Right') {
-        if (config.doorOpening === 'Out') {
-          door.x0 = config.x0;
-          door.y0 = config.y0;
+    if (this.props.wallOrientation === 'Horizontal') {
+      if (props.doorSwing === 'right') {
+        if (props.doorOpening === 'out') {
+          door.x0 = props.coords.x;
+          door.y0 = props.coords.y;
+          rect.x0 = props.coords.x;
+          rect.y0 = props.coords.y - props.width;
           door.angle = 360 - 270;
           door.rotation = 270;
-          line.x0 = config.x0;
-          line.y0 = config.y0;
-          line.x1 = config.x0;
-          line.y1 = config.y0 - doorWidth;
-          line2.x0 = config.x0;
-          line2.y0 = config.y0;
-          line2.x1 = config.x0 + doorWidth;
-          line2.y1 = config.y0;
+          line.x0 = props.coords.x;
+          line.y0 = props.coords.y;
+          line.x1 = props.coords.x;
+          line.y1 = props.coords.y - props.width;
+          line2.x0 = props.coords.x;
+          line2.y0 = props.coords.y;
+          line2.x1 = props.coords.x + props.width;
+          line2.y1 = props.coords.y;
         } else {
-          door.x0 = config.x0;
-          door.y0 = config.y0;
-          door.angle = 360 - 90;
-          door.rotation = 90;
-          line.x0 = config.x0;
-          line.y0 = config.y0;
-          line.x1 = config.x0;
-          line.y1 = config.y0 + doorWidth;
-          line2.x0 = config.x0;
-          line2.y0 = config.y0;
-          line2.x1 = config.x0 + doorWidth;
-          line2.y1 = config.y0;
+          door.x0 = props.coords.x;
+          door.y0 = props.coords.y;
+          rect.x0 = props.coords.x;
+          rect.y0 = props.coords.y;
+          door.angle = 360 - 270;
+          door.rotation = 0;
+          line.x0 = props.coords.x;
+          line.y0 = props.coords.y;
+          line.x1 = props.coords.x;
+          line.y1 = props.coords.y + props.width;
+          line2.x0 = props.coords.x;
+          line2.y0 = props.coords.y;
+          line2.x1 = props.coords.x + props.width;
+          line2.y1 = props.coords.y;
         }
       } else {
-        if (config.doorOpening === 'Out') {
-          door.x0 = config.x0 + doorWidth;
-          door.y0 = config.y0;
-          door.angle = 360 - 180;
-          door.rotation = 270;
-          line.x0 = config.x0 + doorWidth;
-          line.y0 = config.y0;
-          line.x1 = config.x0 + doorWidth;
-          line.y1 = config.y0 - doorWidth;
-          line2.x0 = config.x0;
-          line2.y0 = config.y0;
-          line2.x1 = config.x0 + doorWidth;
-          line2.y1 = config.y0;
-        } else {
-          door.x0 = config.x0 + doorWidth;
-          door.y0 = config.y0;
-          door.angle = 360 - 90;
+        if (props.doorOpening === 'out') {
+          rect.x0 = props.coords.x;
+          rect.y0 = props.coords.y - props.width;
+          door.x0 = props.coords.x + props.width;
+          door.y0 = props.coords.y;
+          door.angle = 360 - 270;
           door.rotation = 180;
-          line.x0 = config.x0 + doorWidth;
-          line.y0 = config.y0;
-          line.x1 = config.x0 + doorWidth;
-          line.y1 = config.y0 + doorWidth;
-          line2.x0 = config.x0;
-          line2.y0 = config.y0;
-          line2.x1 = config.x0 + doorWidth;
-          line2.y1 = config.y0;
+          line.x0 = props.coords.x + props.width;
+          line.y0 = props.coords.y;
+          line.x1 = props.coords.x + props.width;
+          line.y1 = props.coords.y - props.width;
+          line2.x0 = props.coords.x;
+          line2.y0 = props.coords.y;
+          line2.x1 = props.coords.x + props.width;
+          line2.y1 = props.coords.y;
+        } else {
+          rect.x0 = props.coords.x;
+          rect.y0 = props.coords.y;
+          door.x0 = props.coords.x + props.width;
+          door.y0 = props.coords.y;
+          door.angle = 360 - 270;
+          door.rotation = 90;
+          line.x0 = props.coords.x + props.width;
+          line.y0 = props.coords.y;
+          line.x1 = props.coords.x + props.width;
+          line.y1 = props.coords.y + props.width;
+          line2.x0 = props.coords.x;
+          line2.y0 = props.coords.y;
+          line2.x1 = props.coords.x + props.width;
+          line2.y1 = props.coords.y;
         }
       }
     }
+
     return (
-      <Group ref="group" draggable={true} onDragStart={() => console.log('clicked')}>
-        <Rect x={door.x0} y={door.y0 - 50} width={50} height={50} />
+      <Group>
+        <Rect
+          x={rect.x0}
+          y={rect.y0}
+          width={this.props.width}
+          height={this.props.width}
+          onDragMove={e => this.handleDragMove(e, this.props.index, x, y)}
+          onDragEnd={e => this.handleDragEnd(e, this.props.index, x, y)}
+          draggable
+          ref="rect"
+          wallCoords={this.props.wallCoords}
+          onClick={() => this.props.handleSelectDoor(this.props.wallIndex, this.props.index)}
+        />
         <Arc
           x={door.x0}
           y={door.y0}
-          innerRadius={doorSwing}
-          outerRadius={doorSwing - 1}
+          innerRadius={this.props.width * 2 / 2}
+          outerRadius={this.props.width * 2 / 2 - 2}
           angle={door.angle}
           rotation={door.rotation}
-          anticlockwise={true}
-          fill="#94618E"
-          dash={[5, 15]}
+          fill={this.props.selected ? 'red' : 'black'}
+          dash={[9, 15]}
           dashEnabled
-          onClick={() => console.log('click')}
         />
-        <Line points={[line.x0, line.y0, line.x1, line.y1]} stroke={4} strokeWidth={1} />
-        <Line points={[line2.x0, line2.y0, line2.x1, line2.y1]} stroke={'green'} strokeWidth={1} />
+        <Line
+          points={[line.x0, line.y0, line.x1, line.y1]}
+          stroke={2}
+          stroke={this.props.selected ? 'red' : 'black'}
+          strokeWidth={5}
+        />
+        <Line points={[line2.x0, line2.y0, line2.x1, line2.y1]} stroke={'white'} strokeWidth={8} />
       </Group>
     );
   }
 }
-*/
 export default Door;

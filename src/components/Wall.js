@@ -20,13 +20,22 @@ class Wall extends React.Component {
     //  this.refs.wall.setDragBoundFunc(this.props.wallOrientation === 'Vertical' ? boundX : boundY);
   }
 
-  handleDragEnd = (e, index) => {
-    console.log(e.target._lastPos);
+  handleDragMove = (e, index) => {
     let xPos = e.target.attrs.x;
     let yPos = e.target.attrs.y;
-    //console.log({ xPos, yPos });
-    //e.cancelBubble = true;
     this.props.handleWallMove(
+      {
+        x: xPos,
+        y: yPos,
+      },
+      index
+    );
+  };
+
+  handleDragEnd = (e, index) => {
+    let xPos = e.target.attrs.x;
+    let yPos = e.target.attrs.y;
+    this.props.handleEndWallMove(
       {
         x: xPos,
         y: yPos,
@@ -47,11 +56,15 @@ class Wall extends React.Component {
           stroke={wall.selected ? 'red' : 'black'}
           strokeWidth={8}
           index={wall.index}
-          onClick={event => wall.handleSelectWall(event.evt.clientX, event.evt.clientY, wall.index)}
+          onClick={event => {
+            console.log('wallclick', event);
+            wall.handleSelectWall(event.evt.layerX, event.evt.layerY + 15, wall.index);
+          }}
           ref="wall"
           draggable
           onDragStart={e => (e.cancelBubble = true)}
-          onDragMove={e => this.handleDragEnd(e, wall.index)}
+          onDragMove={e => this.handleDragMove(e, wall.index)}
+          onDragEnd={e => this.handleDragEnd(e, wall.index)}
         />
         {wall.selected
           ? <Circle

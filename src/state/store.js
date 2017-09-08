@@ -7,8 +7,20 @@ var Redux = require('redux'),
   coolerReducer = require('./reducers/cooler'),
   initialState = require('./initialState');
 
-var rootReducer = Redux.combineReducers({
+var appReducer = Redux.combineReducers({
   cooler: coolerReducer,
 });
 
-module.exports = Redux.createStore(rootReducer, initialState());
+const rootReducer = (state, action) => {
+  if (action.type === 'CLEAR_DIAGRAM') {
+    state = undefined;
+  }
+
+  return appReducer(state, action);
+};
+
+module.exports = Redux.createStore(
+  rootReducer,
+  initialState(),
+  window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+);
